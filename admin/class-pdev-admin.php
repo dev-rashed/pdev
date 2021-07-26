@@ -1,102 +1,149 @@
 <?php
-
-/**
- * The admin-specific functionality of the plugin.
- *
- * @link       https://edevtook.com
- * @since      1.0.0
- *
- * @package    Pdev
- * @subpackage Pdev/admin
- */
-
-/**
- * The admin-specific functionality of the plugin.
- *
- * Defines the plugin name, version, and two examples hooks for how to
- * enqueue the admin-specific stylesheet and JavaScript.
- *
- * @package    Pdev
- * @subpackage Pdev/admin
- * @author     Rashedul Islam <rashed.eee.brur@gmail.com>
- */
 class Pdev_Admin {
-
-	/**
-	 * The ID of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
-	 */
 	private $plugin_name;
-
-	/**
-	 * The version of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
-	 */
 	private $version;
 
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
 	public function __construct( $plugin_name, $version ) {
-
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
 	}
 
-	/**
-	 * Register the stylesheets for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
 	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Pdev_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Pdev_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/pdev-admin.css', array(), $this->version, 'all' );
 
 	}
 
+	public function enqueue_scripts() {
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/pdev-admin.js', array( 'jquery' ), $this->version, false );
+	}
+	
+	public function register_settings_page(){
+        add_submenu_page(
+			'tools.php',                             // parent slug
+			__( 'Page Title', 'pdev' ),      		// page title
+			__( 'Pdev', 'pdev' ),      					// menu title
+			'manage_options',                        // capability
+			'pdev',                           // menu_slug
+			array( $this, 'display_settings_page' )  // callable function
+		);
+    }
+
+	public function display_settings_page() {
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/pdev-admin-display.php';
+	}
+
 	/**
-	 * Register the JavaScript for the admin area.
+	 * Register the settings for our settings page.
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts() {
+	public function register_settings() {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Pdev_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Pdev_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+		// Here we are going to register our setting.
+		register_setting(
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-settings',
+			array( $this, 'sandbox_register_setting' )
+		);
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/pdev-admin.js', array( 'jquery' ), $this->version, false );
+		// Here we are going to add a section for our setting.
+		add_settings_section(
+			$this->plugin_name . '-settings-section',
+			__( 'Settings', 'pdev' ),
+			array( $this, 'sandbox_add_settings_section' ),
+			$this->plugin_name . '-settings'
+		);
+
+		// Here we are going to add fields to our section.
+		add_settings_field(
+			'post-types',
+			__( 'Post Types', 'pdev' ),
+			array( $this, 'sandbox_add_settings_field_multiple_checkbox' ),
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-settings-section',
+			array(
+				'label_for' => 'post-types',
+				'description' => __( 'Save button will be added only to the checked post types.', 'pdev' )
+			)
+		);
+		add_settings_field(
+			'toggle-content-override',
+			__( 'Append Button', 'pdev' ),
+			array( $this, 'sandbox_add_settings_field_single_checkbox' ),
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-settings-section',
+			array(
+				'label_for' => 'toggle-content-override',
+				'description' => __( 'If checked, it will append save button to the content.', 'pdev' )
+			)
+		);
+		add_settings_field(
+			'toggle-status-override',
+			__( 'Membership', 'pdev' ),
+			array( $this, 'sandbox_add_settings_field_single_checkbox' ),
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-settings-section',
+			array(
+				'label_for' => 'toggle-status-override',
+				'description' => __( 'If checked, this feature will be available only to logged in users. ', 'pdev' )
+			)
+		);
+		add_settings_field(
+			'toggle-css-override',
+			__( 'Our Styles', 'pdev' ),
+			array( $this, 'sandbox_add_settings_field_single_checkbox' ),
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-settings-section',
+			array(
+				'label_for' => 'toggle-css-override',
+				'description' => __( 'If checked, our style will be used.', 'pdev' )
+			)
+		);
+		add_settings_field(
+			'text-save',
+			__( 'Save Item', 'pdev' ),
+			array( $this, 'sandbox_add_settings_field_input_text' ),
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-settings-section',
+			array(
+				'label_for' => 'text-save',
+				'default'   => __( 'Save Item', 'pdev' )
+			)
+		);
+		add_settings_field(
+			'text-unsave',
+			__( 'Unsave Item', 'pdev' ),
+			array( $this, 'sandbox_add_settings_field_input_text' ),
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-settings-section',
+			array(
+				'label_for' => 'text-unsave',
+				'default'   => __( 'Unsave Item', 'pdev' )
+			)
+		);
+		add_settings_field(
+			'text-saved',
+			__( 'Saved. See saved items.', 'pdev' ),
+			array( $this, 'sandbox_add_settings_field_input_text' ),
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-settings-section',
+			array(
+				'label_for' => 'text-saved',
+				'default'   => __( 'Saved. See saved items.', 'pdev' )
+			)
+		);
+		add_settings_field(
+			'text-no-saved',
+			__( 'You don\'t have any saved items.', 'pdev' ),
+			array( $this, 'sandbox_add_settings_field_input_text' ),
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-settings-section',
+			array(
+				'label_for' => 'text-no-saved',
+				'default'   => __( 'You don\'t have any saved items.', 'pdev' )
+			)
+		);
 
 	}
 

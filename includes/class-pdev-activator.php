@@ -1,36 +1,16 @@
 <?php
-
-/**
- * Fired during plugin activation
- *
- * @link       https://edevtook.com
- * @since      1.0.0
- *
- * @package    Pdev
- * @subpackage Pdev/includes
- */
-
-/**
- * Fired during plugin activation.
- *
- * This class defines all code necessary to run during the plugin's activation.
- *
- * @since      1.0.0
- * @package    Pdev
- * @subpackage Pdev/includes
- * @author     Rashedul Islam <rashed.eee.brur@gmail.com>
- */
 class Pdev_Activator {
 
-	/**
-	 * Short Description. (use period)
-	 *
-	 * Long Description.
-	 *
-	 * @since    1.0.0
-	 */
 	public static function activate() {
+		$saved_page_args 	= array (
+			'post_title' 	=> __('My Page', 'pdev'),
+			'post_content'	=> ( '[pdev-content]'),
+			'post_status' 	=> ( 'publish'),
+			'post_type' 	=> ( 'page')
+		);
 
+		$saved_page_id = wp_insert_post($saved_page_args);
+		add_option('pdev_saved_page_id', $saved_page_id);
 	}
 
 }
